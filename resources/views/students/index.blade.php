@@ -1,18 +1,20 @@
+@extends('components.layouts.app')
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Students</title>
-</head>
-<body>
+@section('title', 'Students List')
+
+@section('content')
+
+    <x-navbar />
 
     <h1>Students List</h1>
+
+    <x-alert />
 
     <a href="{{ route('students.create') }}">Add New Student</a>
 
     <br><br>
 
-    <table border="1" cellpadding="10">
+    <table border="1">
         <thead>
             <tr>
                 <th>ID</th>
@@ -21,6 +23,7 @@
                 <th>Phone</th>
                 <th>Address</th>
                 <th>Date of Birth</th>
+                <th>Age</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -33,28 +36,21 @@
                     <td>{{ $student->email }}</td>
                     <td>{{ $student->phone }}</td>
                     <td>{{ $student->address }}</td>
-                    <td>{{ $student->date_of_birth }}</td>
+                    <td>{{ $student->date_of_birth?->format('Y-m-d') }}</td>
+                    <td>{{ $student->age }}</td>
 
                     <td>
                         <a href="{{ route('students.edit', $student->id) }}">
                             Edit
                         </a>
 
-                        <form
-                            action="{{ route('students.destroy', $student->id) }}"
-                            method="POST"
-                            onsubmit="return confirm('Are you sure you want to delete this student?')"
-                        >
-                            @csrf
-                            @method('DELETE')
-
-                            <button type="submit">Delete</button>
-                        </form>
+                        <x-delete-form :action="route('students.destroy', $student->id)" />
                     </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
 
-</body>
-</html>
+    <x-footer />
+
+@endsection

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class StudentController extends Controller
 {
@@ -16,61 +17,56 @@ class StudentController extends Controller
 
     public function create()
     {
-{
-    return view('students.create');
-}
+        return view('students.create');
     }
 
-public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required',
-        'email' => 'required|email|unique:students',
-        'phone' => 'required',
-        'address' => 'nullable',
-        'date_of_birth' => 'nullable|date',
-    ]);
+    public function store(Request $request)
+    {
+        $request->validate($this->rules());
 
-    Student::create($request->all());
+        Student::create($request->all());
 
-    return redirect()->route('students.index');
-}
+        return redirect()->route('students.index');
+    }
 
-    public function show(string $id)
+    public function show(Student $student)
     {
         //
     }
 
-public function edit(string $id)
-{
-    $student = Student::findOrFail($id);
+    public function edit(Student $student)
+    {
+        return view('students.edit', compact('student'));
+    }
 
-    return view('students.edit', compact('student'));
-}
+    public function update(Request $request, Student $student)
+    {
+        $request->validate($this->rules($student));
 
-public function update(Request $request, string $id)
-{
-    $student = Student::findOrFail($id);
+        $student->update($request->all());
 
-    $request->validate([
-        'name' => 'required',
-        'email' => 'required|email|unique:students,email,' . $student->id,
-        'phone' => 'required',
-        'address' => 'nullable',
-        'date_of_birth' => 'nullable|date',
-    ]);
+        return redirect()->route('students.index');
+    }
 
-    $student->update($request->all());
+    public function destroy(Student $student)
+    {
+        $student->delete();
 
-    return redirect()->route('students.index');
-}
+        return redirect()->route('students.index');
+    }
 
-public function destroy(string $id)
-{
-    $student = Student::findOrFail($id);
-
-    $student->delete();
-
-    return redirect()->route('students.index');
-}
+    private function rules(?Student $student = null): array
+    {
+        return [
+            'name' => 'required',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('students')->ignore($student?->id),
+            ],
+            'phone' => 'required',
+            'address' => 'nullable',
+            'date_of_birth' => 'nullable|date',
+        ];
+    }
 }
